@@ -1,6 +1,6 @@
-# Amazon Web Services VPC Terraform Module
+# Alibaba Cloud VPC Terraform Module
 
-This Terraform module creates a configurable general purpose [Amazon Web Services VPC](http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Introduction.html). The module offers an opinionated but flexible network topography geared towards general purpose situations with separate public and private subnets. Each VPC can be configured to support one to four availability zones. Private subnet [NAT](http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/vpc-nat.html) can be configured via [NAT Gateways](http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/vpc-nat-gateway.html). A single [Internet Gateway](http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Internet_Gateway.html) is created to provide public routing for public subnets. The module does not configure a bastion or VPN instance for private subnet instance access.
+This Terraform module creates a configurable general purpose [Alibaba Cloud VPC](https://www.alibabacloud.com/help/doc-detail/34217.htm?spm=a3c0i.l27706en.a3.2.2a4a1a81UeMGUK). The module offers an opinionated but flexible network topography geared towards general purpose situations with separate public and private subnets. Each VPC can be configured to support one to four availability zones. Private subnet [NAT](https://www.alibabacloud.com/product/NAT) can be configured via [NAT Gateway](https://www.alibabacloud.com/product/NAT). A single [Internet Gateway](http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Internet_Gateway.html) is created to provide public routing for public subnets. The module does not configure a bastion or VPN instance for private subnet instance access.
 
 This module has been tested with Terraform version 0.7.9.
 
@@ -14,14 +14,14 @@ This module has been tested with Terraform version 0.7.9.
 
 ```
 module "vpc" {
-  source = "git::ssh://git@github.com/reactiveops/terraform-vpc.git?ref=2.0.2"
+  source = "git::ssh://git@github.com/reactiveops/terraform-alicloud-vpc.git?ref=1.0.0"
 
-  aws_access_key = "${var.aws_access_key}"
-  aws_secret_key = "${var.aws_secret_key}"
-  aws_region = "${var.aws_region}"
+  alicloud_access_key = "${var.alicloud_access_key}"
+  alicloud_secret_key = "${var.alicloud_secret_key}"
+  alicloud_region = "${var.alicloud_region}"
 
   az_count =  "${var.az_count}"
-  aws_azs = "${var.aws_azs}"
+  alicloud_azs = "${var.alicloud_azs}"
 
   vpc_cidr_base = "${var.vpc_cidr_base}"
 
@@ -31,11 +31,11 @@ module "vpc" {
 * Create the required variables either in `main.tf` or a separate `variables.tf` file:
 
 ```
-variable "aws_access_key" {}
-variable "aws_secret_key" {}
-variable "aws_region" {}
+variable "alicloud_access_key" {}
+variable "alicloud_secret_key" {}
+variable "alicloud_region" {}
 
-variable "aws_azs" {}
+variable "alicloud_azs" {}
 variable "az_count" {}
 
 variable "vpc_cidr_base" {}
@@ -45,7 +45,7 @@ variable "vpc_cidr_base" {}
 * Assign variable values, for example in a `terraform.tfvars` file:
 
 ```
-aws_azs = "us-west-2a, us-west-2b, us-west-2c, us-west-2d"
+alicloud_azs = "cn-east-1b, cn-east-1c, cn-east-1d, cn-east-1e"
 az_count = 3
 vpc_cidr_base = "10.0"
 ```
@@ -62,25 +62,25 @@ Generated VPC's will have a /16 CIDR block providing up to 65,536 IP addresses. 
 vpc_cidr_base = "10.1"
 ```
 
-The following subnets will be created in each AZ:
+The following vswitches will be created in each AZ:
 
 * Public
-  * Resources requiring public IP addresses such as VPN/bastion instances and Elastic Load Balancers.
+  * Resources requiring public IP addresses such as VPN/bastion instances and Server Load Balancers.
 * Private working
-  * Internal non-production resources such as web servers and database instances.
+  * Internal non-production resources such as web servers and database instances.  Resources attached to this vswitch should have their bandwidth set to '0' to avoid alicloud assigning them a public IP.
 * Private production
-  * Internal production resources such as web servers and database instances.
+  * Internal production resources such as web servers and database instances.  Resources attached to this vswitch should have their bandwidth set to '0' to avoid alicloud assinging them a public IP.
 * Private admin
-  * Internal shared administrative resources such as build server instances.
+  * Internal shared administrative resources such as build server instances.  Resources attached to this vswitch should have their bandwidth set to '0' to avoid alicloud assigning them a public IP.
 
-Each subnet will be a /21 block providing up to 2,048 IP addresses per subnet and AZ.
+Each subnet will be a /21 block providing up to 2,048 IP addresses per vswitch and AZ.
 
 ### AZ Count
 
 Your VPC can span between one and four AZ's. You can select the specific AZ's that should be used.
 
 ```
-aws_azs = "us-west-2a, us-west-2b, us-west-2c, us-west-2d"
+alicloud_azs = "cn-east-1b, cn-east-1c, cn-east-1d, cn-east-1e"
 az_count = 4
 ```
 
@@ -88,21 +88,21 @@ az_count = 4
 
 `multi_az_nat_gateway`
 
-Ideally, in a multi-AZ setup, there is at least one NAT Gateway residing in each availability zone.  This allows the outbound traffic from private subnets in each AZ to function independently, and allow for some resilience in-case of an AZ outage.
+Ideally, in a multi-AZ setup, there is at least one bandwidth package for the NAT Gateway residing in each availability zone.  This allows the outbound traffic from private subnets in each AZ to function independently, and allow for some resilience in-case of an AZ outage.
 
 `single_nat_gateway`
 
-In some cases, it may be necessary to use a single NAT Gateway, in a single AZ, to pass all outbound traffic from the VPC.  This is usually a result of more than one private subnet needing to share a single route table. Concessions must be made in this situation since a route table can only contain a single default route.  This configuration introduces a single point of failure (SPOF) in to a multi-AZ environment and should be used only when necessary.
+In some cases, it may be necessary to use a single bandwidth package for the NAT Gateway, in a single AZ, to pass all outbound traffic from the VPC.  This configuration introduces a single point of failure (SPOF) in to a multi-AZ environment and should be used only when necessary.
 
 Default values assume a multi-AZ NAT Gateway configuration:
 ```
 variable "multi_az_nat_gateway" {
-  description = "place a NAT gateway in each AZ"
+  description = "place a bandwidth package for the NAT gateway in each AZ"
   default = 1
 }
 
 variable "single_nat_gateway" {
-  description = "use a single NAT gateway to serve outbound traffic for all AZs"
+  description = "use a single bandwidth package for the NAT gateway to serve outbound traffic for all AZs"
   default = 0
 }
 ```
@@ -111,23 +111,7 @@ To use a single NAT gateway, set `multi_az_nat_gateway = 0` and `single_nat_gate
 
 ### Tagging
 
-The subnets created can include custom tags by setting variables of the form `SUBNETNAME_subnet_tags`.
-
-| Subnet          | Variable                    |
-| --------------- | --------------------------- |
-| admin           | admin_subnet_tags           |
-| public          | public_subnet_tags          |
-| private_prod    | private_prod_subnet_tags    |
-| private_working | private_working_subnet_tags |
-
-The routing tables can include custom tags by setting variables of the form `TABLENAME_route_table_tags`.
-
-| Route Table | Variable                 |
-| ----------- | ------------------------ |
-| public      | public_route_table_tags  |
-| private     | private_route_table_tags |
-
-The internet gateway can be tagged with the variable `internet_gateway_tags`
+As of this writing, Alibaba Cloud does not support tagging of vSwitches via Terraform.
 
 ## Testing
 
@@ -135,11 +119,11 @@ This repo contains a few `.tfvars.example` files in the root illustrating differ
 
 ### Setup
 
-Running `make test` requires an actual AWS account for plan generation. The AWS account used requires read-only access to VPC/EC2 resources. No changes are applied. Credentials can be set via environment variables.
+Running `make test` requires an actual Alicloud account for plan generation. The Alicloud account used requires read-only access to VPC/ECS resources. No changes are applied. Credentials can be set via environment variables.
 
 ```
-export TF_VAR_aws_access_key=XXXXXXXXXXXXXXXXX
-export TF_VAR_aws_secret_key=XXXXXXXXXXXXXXXXXXXXXXXXXXXX
+export TF_VAR_alicloud_access_key=XXXXXXXXXXXXXXXXX
+export TF_VAR_alicloud_secret_key=XXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ```
 
 ### Executing tests
