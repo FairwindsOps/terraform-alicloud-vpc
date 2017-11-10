@@ -15,7 +15,7 @@
 resource "alicloud_nat_gateway" "nat_gateway" {
   vpc_id = "${alicloud_vpc.default.id}"
   spec = "${var.nat_gateway_spec}"
-  bandwidth_packages = ["${var.nat_bandwidth_packages}"]
+  bandwidth_packages = "${var.nat_bandwidth_packages}"
   depends_on = ["alicloud_vswitch.public"]
 }
 
