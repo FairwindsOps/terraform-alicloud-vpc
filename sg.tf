@@ -12,25 +12,23 @@
 #See the License for the specific language governing permissions and
 #limitations under the License.
 
-#resource "alicloud_nat_gateway" "nat_gateway" {
-#  vpc_id = "${alicloud_vpc.default.id}"
-#  spec = "${var.nat_gateway_spec}"
-#  bandwidth_packages = [
-#      {
-#        ip_count  = 1
-#        bandwidth = 200
-#        zone = "${element(split(", ", var.alicloud_azs), 1)}"
-#      }
-#  ]
-#  depends_on = [
-#    "alicloud_vswitch.public"
-#  ]
-#}
+resource "alicloud_security_group" "vpc-sg" {
+  name = "${var.vpc_security_group_name}"
+  vpc_id = "${alicloud_vpc.default.id}"
+  description = "Security group for VPC instances"
+}
 
-#output "alicoud_nat_gateway_count" {
-#  value = "${length(alicloud_nat_gateway.nat_gateway.*.bandwidth_package_ids)}"
-#}
+resource "alicloud_security_group_rule" "ssh-in" {
+  type = "ingress"
+  ip_protocol = "tcp"
+  nic_type = "intranet"
+  policy = "accept"
+  port_range = "22/22"
+  priority = 1
+  security_group_id = "${alicloud_security_group.vpc-sg.id}"
+  cidr_ip = "0.0.0.0/0"
+}
 
-#output "alicloud_nat_gateway_ids" {
-#  value = ["${alicloud_nat_gateway.nat_gateway.*.id}"]
-#}
+output "sg_id" {
+  value = "${alicloud_security_group.vpc-sg.id}"
+}

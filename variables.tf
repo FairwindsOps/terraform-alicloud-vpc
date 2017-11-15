@@ -89,11 +89,6 @@ variable "public_subnet_cidrs" {
   }
 }
 
-variable "public_subnet_tags" {
-  description = "Tags to apply to the public subnets"
-  default = {}
-}
-
 variable "private_prod_subnet_parent_cidr" {
   description = "parent CIDR for the private production subnets"
   default = ".64.0/19"
@@ -129,56 +124,13 @@ variable "private_working_subnet_cidrs" {
   }
 }
 
-variable "private_working_subnet_tags" {
-  description = "Tags to apply to the private working subnets"
-  default = {}
-}
-
-variable "multi_az_nat_gateway" {
-  description = "place a NAT gateway in each AZ"
-  default = 1
-}
-
-variable "single_nat_gateway" {
-  description = "use a single NAT gateway to serve outbound traffic for all AZs"
-  default = 0
-}
-
 variable "nat_gateway_spec" {
   description = "size of the NAT gateway to deploy"
   default = "Middle"
 }
+
+variable "vpc_security_group_name" {
+  description = "name of security group to create for the VPC"
+  default     = "tfvpc-sg"
+}
  
-variable "nat_bandwidth_packages" {
-   description = "list of bandwidth packages to use for the nat gateway"
-   default = [ {ip_count=1, bandwidth=5} ]
-}
-variable "nat_package_bandwidth" {
-   description = "Bandwidth for each block bandwidth package of the NAT gateway"
-   default = 5
-}
-
-variable "nat_package_publicips" {
-  description = "Number of public IPs per nat bandwidth package"
-  default = 1
-}
-
-
-variable "public_route_table_tags" {
-  description = "Tags to apply to the public route table"
-  default = {}
-}
-
-variable "private_route_table_tags" {
-  description = "Tags to apply to the private route table"
-  default = {}
-}
-
-variable "global_tags" {
-  description = "Aliyun tags that will be added to all resources managed herein"
-  type = "map"
-  default = {
-    "Author" = "ReactiveOps"
-    "Managed By" = "Terraform"
-  }
-}

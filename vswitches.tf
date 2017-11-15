@@ -19,30 +19,27 @@
 resource "alicloud_vswitch" "admin" {
   count = "${var.az_count}"
   vpc_id = "${alicloud_vpc.default.id}"
+  name = "admin_${element(split(", ", var.alicloud_azs), count.index)}"
   cidr_block = "${var.vpc_cidr_base}${lookup(var.admin_subnet_cidrs, format("zone%d", count.index))}"
   availability_zone = "${element(split(", ", var.alicloud_azs), count.index)}"
+  depends_on = [
+    "alicloud_vpc.default"
+  ]
 }
 
 output "alicloud_vswitch_admin_ids" {
   value = ["${alicloud_vswitch.admin.*.id}"]
 }
 
-resource "alicloud_vswitch" "public" {
-  count = "${var.az_count}"
-  vpc_id = "${alicloud_vpc.default.id}"
-  cidr_block = "${var.vpc_cidr_base}${lookup(var.public_subnet_cidrs, format("zone%d", count.index))}"
-  availability_zone = "${element(split(", ", var.alicloud_azs), count.index)}"
-}
-
-output "alicloud_vswitch_public_ids" {
-  value = ["${alicloud_vswitch.public.*.id}"]
-}
-
 resource "alicloud_vswitch" "private_prod" {
   count = "${var.az_count}"
+  name = "private_${element(split(", ", var.alicloud_azs), count.index)}_prod"
   vpc_id = "${alicloud_vpc.default.id}"
   cidr_block = "${var.vpc_cidr_base}${lookup(var.private_prod_subnet_cidrs, format("zone%d", count.index))}"
   availability_zone = "${element(split(", ", var.alicloud_azs), count.index)}"
+  depends_on = [
+    "alicloud_vpc.default"
+  ]
 }
 
 output "alicloud_vswitch_private_prod_ids" {
@@ -51,9 +48,13 @@ output "alicloud_vswitch_private_prod_ids" {
 
 resource "alicloud_vswitch" "private_working" {
   count = "${var.az_count}"
+  name = "private_${element(split(", ", var.alicloud_azs), count.index)}_working"
   vpc_id = "${alicloud_vpc.default.id}"
   cidr_block = "${var.vpc_cidr_base}${lookup(var.private_working_subnet_cidrs, format("zone%d", count.index))}"
   availability_zone = "${element(split(", ", var.alicloud_azs), count.index)}"
+  depends_on = [
+    "alicloud_vpc.default"
+  ]
 }
 
 output "alicloud_vswitch_private_working_ids" {
