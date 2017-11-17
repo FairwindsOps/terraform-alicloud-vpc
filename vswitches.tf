@@ -45,6 +45,9 @@ resource "alicloud_vswitch" "private_prod" {
 output "alicloud_vswitch_private_prod_ids" {
   value = ["${alicloud_vswitch.private_prod.*.id}"]
 }
+output "alidcloud_vswitch_private_prod_names" {
+  value = ["$alicloud_vswitch.private_prod.*.name}"]
+}
 
 resource "alicloud_vswitch" "private_working" {
   count = "${var.az_count}"
@@ -60,4 +63,6 @@ resource "alicloud_vswitch" "private_working" {
 output "alicloud_vswitch_private_working_ids" {
   value = ["${alicloud_vswitch.private_working.*.id}"]
 }
-
+output "alicloud_vswitch_private_working_names" {
+  value = ["${alicloud_vswitch.private_working.*.name}"]
+}
