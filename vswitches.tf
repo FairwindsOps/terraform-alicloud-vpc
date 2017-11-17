@@ -50,7 +50,8 @@ output "alicloud_vswitch_private_prod_names" {
 }
 
 resource "alicloud_vswitch" "private_working" {
-  count = "${var.az_count}"
+#  count = "${var.az_count}"
+  count = 0
   name = "private_${element(split(", ", var.alicloud_azs), count.index)}_working"
   vpc_id = "${alicloud_vpc.default.id}"
   cidr_block = "${var.vpc_cidr_base}${lookup(var.private_working_subnet_cidrs, format("zone%d", count.index))}"
