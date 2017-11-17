@@ -45,7 +45,7 @@ resource "alicloud_vswitch" "private_prod" {
 output "alicloud_vswitch_private_prod_ids" {
   value = ["${alicloud_vswitch.private_prod.*.id}"]
 }
-output "alidcloud_vswitch_private_prod_names" {
+output "alicloud_vswitch_private_prod_names" {
   value = ["$alicloud_vswitch.private_prod.*.name}"]
 }
 
