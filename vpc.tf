@@ -13,6 +13,7 @@
 #limitations under the License.
 
 resource "alicloud_vpc" "default" {
+  provider = "alicloud.${var.alicloud_region}"
   name = "${var.alicloud_vpc_name}"
   cidr_block = "${var.vpc_cidr_base}.0.0/16"
 }
