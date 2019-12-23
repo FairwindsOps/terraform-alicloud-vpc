@@ -14,7 +14,7 @@ This module has been tested with Terraform version 0.7.9.
 
 ```
 module "vpc" {
-  source = "git::ssh://git@github.com/reactiveops/terraform-alicloud-vpc.git?ref=1.0.0"
+  source = "git::ssh://git@github.com/FairwindsOps/terraform-alicloud-vpc.git?ref=1.0.0"
 
   alicloud_access_key = "${var.alicloud_access_key}"
   alicloud_secret_key = "${var.alicloud_secret_key}"
